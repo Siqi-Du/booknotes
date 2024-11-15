@@ -1,19 +1,21 @@
 # Ad Click Event Aggregation
-Digital advertising is a big industry with the rise of Facebook, YouTube, TikTok, etc.
+**Digital advertising** is a big industry with the rise of Facebook, YouTube, TikTok, etc. Benifit is its measurability(quantified by real-time data).
 
 Hence, tracking ad click events is important. In this chapter, we explore how to design an ad click event aggregation system at Facebook/Google scale.
 
-Digital advertising has a process called real-time bidding (RTB), where digital advertising inventory is bought and sold:
+Digital advertising has a core process called [**real-time bidding (RTB)**](https://www.youtube.com/watch?v=ylhKJSrxutM&ab_channel=WebFX), where digital advertising inventory is bought and sold:
 ![digital-advertising-example](images/digital-advertising-example.png)
 
 Speed of RTB is important as it usually occurs within a second.
-Data accuracy is also very important as it impacts how much money advertisers pay.
+Data accuracy(mesure effectiveness) is also very important as it impacts how much money advertisers pay.
 
-Based on ad click event aggregations, advertisers can make decisions such as adjust target audience and keywords.
+Based on ad click event aggregations, advertisers can make decisions such as adjust target audience and keywords. Key metrics used: click-through rate(CTR) and conversion rate(CVR).
 
 # Step 1 - Understand the Problem and Establish Design Scope
  * C: What is the format of the input data?
- * I: 1bil ad clicks per day and 2mil ads in total. Number of ad-click events grows 30% year-over-year.
+ * I: log file in different servers. click events with ad_id, click_timestamp, user_id, ip and country
+ * C: Data colume?
+ * I: **1 bil ad clicks per day** and **2mil ads in total**. Number of ad-click events grows **30%** year-over-year.
  * C: What are some of the most important queries our system needs to support?
  * I: Top queries to take into consideration:
    * Return number of click events for ad X in last Y minutes
@@ -30,7 +32,7 @@ Based on ad click event aggregations, advertisers can make decisions such as adj
 ## Functional requirements
  * Aggregate the number of clicks of `ad_id` in the last Y minutes
  * Return top 100 most clicked `ad_id` every minute
- * Support aggregation filtering by different attributes
+ * Support aggregation filtering by user, ad, or country
  * Dataset volume is at Facebook or Google scale
 
 ## Non-functional requirements
@@ -40,7 +42,7 @@ Based on ad click event aggregations, advertisers can make decisions such as adj
  * Latency - a few minutes of e2e latency at most
 
 ## Back-of-the-envelope estimation
- * 1bil DAU
+ * 1 billion DAU
  * Assuming user clicks 1 ad per day -> 1bil ad clicks per day
  * Ad click QPS = 10,000
  * Peak QPS is 5 times the number = 50,000
@@ -51,7 +53,7 @@ Based on ad click event aggregations, advertisers can make decisions such as adj
 In this section, we discuss query API design, data model and high-level design.
 
 ## Query API Design
-The API is a contract between the client and the server. In our case, the client is the dashboard user - data scientist/analyst, advertiser, etc.
+The API is a contract between the client and the server. In our case, the client is the dashboard user - data scientist/analyst, advertiser, etc. who run queries against the aggregation service
 
 Here's our functional requirements:
  * Aggregate the number of clicks of `ad_id` in the last Y minutes
